@@ -9,4 +9,5 @@ urlpatterns = [
     path("auth/refresh/", TokenRefreshView.as_view(),name='token_refresh'),
     path("files/", upload_file,name='upload_file'),
     path("files/<uuid:file_id>/", download_file,name='download_file'),
+    path("files/my/",my_files,name='my_files')
 ]

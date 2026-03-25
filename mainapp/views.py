@@ -4,10 +4,12 @@ from rest_framework.decorators import api_view, permission_classes
 from rest_framework.response import Response
 from rest_framework import status
 from django.contrib.auth.models import User
-from .serializers import RegisterSerializer
+from .serializers import FileSerializer, RegisterSerializer
 from rest_framework.permissions import IsAuthenticated
 from .models import File
 from django.shortcuts import get_object_or_404
+from .serializers import *
+from filegate.pagination import filePagination
 
 # Create your views here.
 
@@ -62,3 +64,15 @@ def download_file(request, file_id):
     file_obj.download_count += 1
     file_obj.save()
     return FileResponse(file_obj.file, as_attachment=True, filename=file_obj.filename) 
+
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def my_files(request):
+    if not request.user.is_authenticated:
+        return Response({"error": "Authentication required"}, status=status.HTTP_401_UNAUTHORIZED)
+    
+    files = File.objects.filter(user=request.user)
+    paginator = filePagination()
+    result_page = paginator.paginate_queryset(files, request)
+    serializer = FileSerializer(result_page, many=True)
+    return paginator.get_paginated_response(serializer.data)

@@ -1,6 +1,7 @@
 from rest_framework import serializers
 from django.contrib.auth.models import User
 from django.contrib.auth.password_validation import validate_password
+from .models import File
 
 
 class RegisterSerializer(serializers.ModelSerializer):
@@ -35,3 +36,9 @@ class RegisterSerializer(serializers.ModelSerializer):
         validated_data.pop('password2')
         user = User.objects.create_user(**validated_data)
         return user
+
+class FileSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = File
+        fields = ['id', 'user', 'file', 'filename', 'uploaded_at', 'download_count']
+        read_only_fields = ['id', 'user', 'uploaded_at', 'download_count']
