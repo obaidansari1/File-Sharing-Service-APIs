@@ -39,6 +39,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'rest_framework',
     'mainapp',
+    "corsheaders",
 ]
 
 REST_FRAMEWORK = {
@@ -57,6 +58,7 @@ SIMPLE_JWT = {
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
+    "corsheaders.middleware.CorsMiddleware",
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
@@ -139,3 +141,12 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 MEDIA_ROOT = "uploads/"
 MEDIA_URL = "/media/"
+
+CORS_ALLOWED_ORIGINS = [
+    "http://localhost:8080",
+    "http://localhost:5173",
+    "http://127.0.0.1:5173",
+]
+
+# Allow CORS for credentials
+CORS_ALLOW_CREDENTIALS = True

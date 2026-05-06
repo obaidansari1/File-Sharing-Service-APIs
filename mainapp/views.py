@@ -58,12 +58,58 @@ def upload_file(request):
         }
     )
 
-@api_view(['GET'])
+@api_view(['GET', 'DELETE'])
 def download_file(request, file_id):
-    file_obj = get_object_or_404(File,id=file_id)
+    file_obj = get_object_or_404(File, id=file_id)
+    
+    if request.method == 'DELETE':
+        if not request.user.is_authenticated or file_obj.user != request.user:
+            return Response(
+                {"error": "You don't have permission to delete this file"},
+                status=status.HTTP_403_FORBIDDEN
+            )
+        file_obj.delete()
+        return Response(
+            {"message": "File deleted successfully"},
+            status=status.HTTP_204_NO_CONTENT
+        )
+    
+    # GET - download file (no auth required)
     file_obj.download_count += 1
     file_obj.save()
-    return FileResponse(file_obj.file, as_attachment=True, filename=file_obj.filename) 
+    return FileResponse(file_obj.file, as_attachment=True, filename=file_obj.filename)
+
+@api_view(['GET'])
+def preview_file(request, file_id):
+    file_obj = get_object_or_404(File, id=file_id)
+    
+    # Check if file is a text file
+    text_extensions = ['.txt', '.csv', '.json', '.xml', '.html', '.css', '.js', '.py', '.java', '.cpp', '.c', '.md', '.log']
+    file_extension = '.' + file_obj.filename.split('.')[-1].lower() if '.' in file_obj.filename else ''
+    
+    if file_extension in text_extensions:
+        try:
+            # Read text file content
+            with file_obj.file.open('r', encoding='utf-8', errors='ignore') as f:
+                content = f.read()
+            
+            return Response({
+                "filename": file_obj.filename,
+                "content": content,
+                "preview_url": request.build_absolute_uri(f"/api/files/{file_obj.id}/")
+            })
+        except Exception as e:
+            return Response(
+                {"error": f"Failed to read file: {str(e)}"},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
+    
+    # For document files (PDF, Word), images, videos, etc., return the preview URL
+    preview_url = request.build_absolute_uri(f"/api/files/{file_obj.id}/")
+    return Response({
+        "filename": file_obj.filename,
+        "preview_url": preview_url
+    }) 
 
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
