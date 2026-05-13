@@ -1,7 +1,7 @@
 from rest_framework import serializers
 from django.contrib.auth.models import User
 from django.contrib.auth.password_validation import validate_password
-from .models import File
+from .models import File, Folder
 
 
 class RegisterSerializer(serializers.ModelSerializer):
@@ -37,8 +37,19 @@ class RegisterSerializer(serializers.ModelSerializer):
         user = User.objects.create_user(**validated_data)
         return user
 
+class FolderSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Folder
+        fields = ['id', 'name', 'created_at']
+        read_only_fields = ['id', 'created_at']
+
 class FileSerializer(serializers.ModelSerializer):
+    thumbnail_file = serializers.FileField(read_only=True)
+
+    resized_file = serializers.FileField(read_only=True)
     class Meta:
         model = File
-        fields = ['id', 'user', 'file', 'filename', 'uploaded_at', 'download_count']
-        read_only_fields = ['id', 'user', 'uploaded_at', 'download_count']
+        fields = ['id', 'user', 'file', 'filename', 'folder', 'uploaded_at', 'download_count', 'thumbnail_file',
+            'resized_file', 'processing_status']
+        read_only_fields = ['id', 'user', 'uploaded_at', 'download_count', 'thumbnail_file',
+            'resized_file', 'processing_status']

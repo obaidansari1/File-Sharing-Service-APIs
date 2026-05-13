@@ -10,5 +10,8 @@ urlpatterns = [
     path("files/", upload_file,name='upload_file'),
     path("files/<uuid:file_id>/", download_file,name='download_file'),
     path("files/<uuid:file_id>/preview/", preview_file, name='preview_file'),
-    path("files/my/",my_files,name='my_files')
+    path("files/<uuid:file_id>/view/", view_file, name='view_file'),
+    path("files/my/",my_files,name="my_files"),
+    path("folders/", folders_list, name="folders_list"),
+    path("folders/<uuid:folder_id>/", delete_folder, name="delete_folder")
 ]
